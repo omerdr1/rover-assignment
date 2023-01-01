@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+</head>
+
+<script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.7.3/nipplejs.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript" type="text/javascript">
+
+  var ros = new ROSLIB.Ros({
+    url: 'ws://localhost:9090'
+  });
+
+  ros.on('connection', function () {
+    document.getElementById("status").innerHTML = "Connected";
+  });
+  ros.on('error', function (error) {
+    document.getElementById("status").innerHTML = "Error";
+  });
+  ros.on('close', function () {
+    document.getElementById("status").innerHTML = "Closed";
+  });
+
+  // Create a subscriber
+  var timeSub = new ROSLIB.Topic({
+    ros: ros,
+    name: '/rover/interface/time',
+    messageType: 'std_msgs/String'
+  });
+
+  timeSub.subscribe(function (message) {
+    var time = new Date(message.data * 1000);
+
+    var timeDiv = document.getElementById('time');
+    timeDiv.innerHTML = time
+
+  });
+
+  var temperatureSub = new ROSLIB.Topic({
+    ros: ros,
+    name: '/rover/interface/voltage',
+    messageType: 'std_msgs/Float32'
+  });
+
+  temperatureSub.subscribe(function (message) {
+    var temperature = message.data;
+
+    var temperatureDiv = document.getElementById('temperature');
+    temperatureDiv.innerHTML = temperature.toFixed(1)
+  });
+
+
+  var voltageSub = new ROSLIB.Topic({
+    ros: ros,
+    name: "/rover/interface/voltage",
+    messageType: "std_msgs/Float32"
+  })
+
+  voltageSub.subscribe(function (message) {
+    var voltage = 100 * (message.data - 21.4) / 4.2;
+
+    var voltageDiv = document.getElementById('voltage');
+    voltageDiv.innerHTML = voltage.toFixed(0)
+
+  });
+
+  var humiditySub = new ROSLIB.Topic({
+    ros: ros,
+    name: "/rover/interface/humidity",
+    messageType: "std_msgs/Float32"
+  })
+
+  humiditySub.subscribe(function (message) {
+    var humidity = message.data;
+
+    var humidityDiv = document.getElementById('humidity');
+    humidityDiv.innerHTML = humidity.toFixed(0)
+  });
+</script>
+
+
+
+
+<link rel="stylesheet" href="style.css">
+
+<body>
+
+  <h1>ROS Web Interface</h1>
+  <p>Connection status: <span id="status"></span></p>
+
+
+  <div class="flexbox-container">
+    <p class="flexbox-voltage">Batarya Seviyesi %<span id="voltage"></span></p>
+    <p class="flexbox-time">Zaman: <span id="time"></span></p>
+  </div>
+
+  <div class="container2">
+
+    <div class="flexbox-temperature">Sıcaklık: <span id="temperature"></span>°C
+      <canvas id="tempChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+
+      const ctx = document.getElementById('tempChart');
+      const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [1, 2, 3], // X-axis labels will be added later
+          datasets: [{
+            label: 'My Data',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: [] // Y-axis data will be added later
+          }]
+        },
+        options: {
+          scales: {
+
+            x: {
+              ticks: {
+
+                maxTicksLimit: 3
+              }
+            }
+            ,
+            y: [{
+              ticks:
+
+
+              {
+                beginAtZero: false
+              }
+            }]
+
+          }
+        }
+      });
+
+
+      var temperatureSub = new ROSLIB.Topic({
+        ros: ros,
+        name: '/rover/interface/voltage',
+        messageType: 'std_msgs/Float32'
+      });
+
+      temperatureSub.subscribe(function (message) {
+
+        chart.data.labels.push(new Date().getMinutes()); // Add the current time as the x-axis label
+        chart.data.datasets[0].data.push(message.data); // Add the data from the message as the y-axis value
+
+        chart.update();
+      });
+
+    </script>
+    </script>
+
+    <div class="flexbox-humidity"> Bağıl Nem: %<span id="humidity"></span>
+      <canvas id="myChart"></canvas>
+    </div>
+    <script>
+
+      const ctx1 = document.getElementById('myChart');
+      new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: [1, 2, 3], // X-axis labels will be added later
+          datasets: [{
+            label: 'My Data',
+            data: [] // Y-axis data will be added later
+          }]
+        },
+        options: {
+          scales: {
+
+            x: {
+              ticks: {
+
+                maxTicksLimit: 2
+              }
+            }
+            ,
+            y: [{
+              ticks:
+
+
+              {
+                beginAtZero: true
+              }
+            }]
+
+          }
+        }
+      });
+
+      
+      var humiditySub = new ROSLIB.Topic({
+        ros: ros,
+        name: '/rover/interface/humidity',
+        messageType: 'std_msgs/Float32'
+      });
+
+      humiditySub.subscribe(function (message) {
+
+        var newData1 = message.data;
+ 
+        chart.data.labels.push(new Date().getSeconds()); // Add the current time as the x-axis label
+        chart.data.datasets[0].data.push(message.data); // Add the data from the message as the y-axis value
+
+        chart.update();
+      });
+
+    </script>
+
+</body>
+
+</html>

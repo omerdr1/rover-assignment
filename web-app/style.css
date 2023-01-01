@@ -1,0 +1,60 @@
+body {
+    background-color: beige;
+
+    font-family: Georgia, 'Times New Roman', Times, serif'Courier New', Courier, monospace;
+    font-size: large;
+
+}
+
+.container2 {
+    display: flex;
+    padding: 20px;
+
+    justify-content: space-around
+}
+
+.flexbox-container {
+    display: flex;
+    padding: 20px;
+    justify-content: space-around
+}
+
+
+.flexbox-time {
+    width: 250px;
+    height: 60px;
+    border: 3px solid black;
+    background-color: aliceblue;
+    text-align: center;
+}
+
+
+.flexbox-voltage {
+
+    width: 250px;
+    height: 250px;
+    border: 3px solid black;
+    background-color: aliceblue;
+    text-align: center;
+}
+
+.flexbox-temperature {
+
+
+    border: 3px solid black;
+    width: 30%;
+    height: 30%;
+    text-align: center;
+
+
+}
+
+.flexbox-humidity {
+
+    width: 30%;
+    height: 30%;
+    border: 3px solid black;
+    text-align: center;
+
+
+}
